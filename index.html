@@ -439,10 +439,15 @@ function parseCSV(text) {
 }
 
 // ── STATUS DETECTION ──────────────────────────────────────
-function detectStatus(remarks) {
+function detectStatus(remarks, allCells) {
+  // Check every cell in the row — not just remarks
+  const allText = (allCells || []).join(' ').toUpperCase();
   const r = (remarks || '').toUpperCase();
-  if (r.includes('CANCEL')) return 'cancelled';
-  if (r.includes('COMPLET') || r.includes('NO OUTSTANDING')) return 'done';
+  if (allText.includes('CANCEL')) return 'cancelled';
+  if (r.includes('COMPLET') || r.includes('NO OUTSTANDING') || allText.includes('NO OUTSTANDING')) return 'done';
+  // If most data fields are empty or N/A, likely cancelled
+  const filledCells = (allCells || []).filter(c => c && c.trim() && c.trim().toUpperCase() !== 'N/A').length;
+  if (filledCells <= 2) return 'cancelled';
   return 'progress';
 }
 
@@ -524,7 +529,7 @@ function processData(rows) {
     if (num < 1 || num > 50) continue;
     const id = String(num).padStart(2, '0');
     const remarks = r[colMap.remarks] || '';
-    const status  = detectStatus(remarks);
+    const status  = detectStatus(remarks, r);
     const rrow    = r[colMap.rrow] || '';
     const cp      = r[colMap.cp] || '';
     wtgData.push({
