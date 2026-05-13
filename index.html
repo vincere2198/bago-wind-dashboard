@@ -146,6 +146,54 @@
   .issue-list li { font-size: 11px; color: var(--text-secondary); padding: 4px 0; border-bottom: 0.5px solid var(--border); }
   .issue-list li:last-child { border-bottom: none; }
   .wtg-badge { display: inline-block; font-size: 9px; font-weight: 700; background: var(--navy); color: var(--white); border-radius: 3px; padding: 1px 5px; margin-right: 5px; }
+
+  /* PAYMENT TABLE */
+  .payment-section { background: var(--white); border: 1px solid var(--border); border-top: 3px solid var(--blue); border-radius: 8px; padding: 1.25rem 1.5rem; margin-bottom: 1.75rem; }
+  .payment-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+  .payment-section-title { font-size: 13px; font-weight: 700; color: var(--navy); }
+  .payment-section-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .payment-url-row { display: flex; gap: 8px; align-items: center; }
+  .payment-url-input { font-size: 10px; padding: 5px 9px; border: 1px solid var(--border); border-radius: 6px; color: var(--navy); outline: none; font-family: monospace; width: 320px; max-width: 100%; }
+  .payment-url-btn { background: var(--navy); color: var(--white); border: none; border-radius: 6px; padding: 5px 14px; font-size: 10px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  .payment-url-btn:hover { background: var(--navy-light); }
+  .payment-filter-row { display: flex; gap: 7px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
+  .pay-filter { font-size: 10px; font-weight: 600; padding: 3px 11px; border-radius: 20px; border: 1.5px solid var(--border); background: var(--white); color: var(--text-secondary); cursor: pointer; transition: all 0.15s; }
+  .pay-filter:hover { border-color: var(--blue); color: var(--blue); }
+  .pay-filter.pf-all      { background: var(--navy);   border-color: var(--navy);   color: var(--white); }
+  .pay-filter.pf-upcoming { background: var(--yellow);  border-color: var(--yellow);  color: var(--white); }
+  .pay-filter.pf-overdue  { background: var(--red);    border-color: var(--red);    color: var(--white); }
+  .pay-filter.pf-duetoday { background: #c05000; border-color: #c05000; color: var(--white); }
+  .pay-filter.pf-duesoon  { background: #7a5900; border-color: #7a5900; color: var(--white); }
+  .pay-filter.pf-forreview{ background: #555;    border-color: #555;    color: var(--white); }
+  .pay-filter.pf-process  { background: var(--blue);   border-color: var(--blue);   color: var(--white); }
+  .pay-filter.pf-paid     { background: var(--green);  border-color: var(--green);  color: var(--white); }
+  .payment-table-wrap { overflow-x: auto; }
+  .payment-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .payment-table th { text-align: left; color: var(--text-muted); font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; padding: 6px 10px; border-bottom: 2px solid var(--border); white-space: nowrap; background: var(--surface); }
+  .payment-table td { padding: 7px 10px; border-bottom: 0.5px solid var(--border); color: var(--text-secondary); vertical-align: middle; line-height: 1.5; }
+  .payment-table tr:last-child td { border-bottom: none; }
+  .payment-table tr:hover td { background: var(--surface); }
+  .payment-table td.col-wtg { font-weight: 700; color: var(--navy); white-space: nowrap; }
+  .payment-table td.col-name { font-weight: 600; color: var(--text-primary); }
+  .pay-status { display: inline-block; font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
+  .ps-upcoming  { background: var(--yellow-bg); color: var(--yellow-text); }
+  .ps-overdue   { background: var(--red-bg);    color: var(--red-text); }
+  .ps-duetoday  { background: #ffe8d6; color: #c05000; }
+  .ps-duesoon   { background: #fff8d6; color: #7a5900; }
+  .ps-forreview { background: #eeeeee; color: #444444; }
+  .ps-nodate    { background: #f5f5f5; color: #888888; }
+  .days-chip { display: inline-block; font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 10px; }
+  .days-urgent  { background: var(--red-bg);    color: var(--red-text); }
+  .days-soon    { background: var(--yellow-bg); color: var(--yellow-text); }
+  .days-ok      { background: var(--green-bg);  color: var(--green-text); }
+  .payment-empty { text-align: center; padding: 2rem 1rem; font-size: 12px; color: var(--text-muted); font-style: italic; }
+  .payment-kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+  .pay-kpi { background: var(--surface); border-radius: 6px; padding: 10px 12px; text-align: center; }
+  .pay-kpi-val { font-size: 22px; font-weight: 700; line-height: 1.1; }
+  .pay-kpi-lbl { font-size: 10px; color: var(--text-muted); margin-top: 2px; font-weight: 500; }
+  .pay-notice { font-size: 11px; background: var(--yellow-bg); border: 1px solid rgba(212,160,23,0.3); border-radius: 6px; padding: 9px 12px; color: var(--yellow-text); margin-bottom: 12px; display: none; }
+  .pay-notice.visible { display: block; }
+
   .footer { text-align: center; font-size: 11px; color: var(--text-muted); padding-top: 1rem; border-top: 1px solid var(--border); }
 
   /* ── TABLET (≤768px) ───────────────────────────────── */
@@ -197,6 +245,10 @@
     .issue-list li { font-size: 10px; }
     .progress-meta { font-size: 11px; }
     .hint-text { font-size: 10px; }
+    .payment-kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .payment-url-input { width: 100%; }
+    .payment-section-header { flex-direction: column; align-items: flex-start; }
+    .payment-table th, .payment-table td { font-size: 10px; padding: 5px 7px; }
     .detail-field-value { font-size: 11px; }
     .detail-remarks-text { font-size: 11px; }
   }
@@ -384,6 +436,69 @@
       <div style="position:relative;height:190px;">
         <canvas id="cpChart"></canvas>
       </div>
+    </div>
+  </div>
+
+  <!-- UPCOMING LANDOWNER PAYMENTS SECTION -->
+  <p class="section-label">Upcoming RROW landowner payments</p>
+  <div class="payment-section">
+    <div class="payment-section-header">
+      <div>
+        <p class="payment-section-title">RROW Landowner Payment Schedule</p>
+        <p class="payment-section-sub">Paste the published CSV URL from your <em>RROW Landowner Payment Tracker</em> Google Sheet below to load live data</p>
+      </div>
+      <div class="payment-url-row">
+        <input id="payment-csv-url" class="payment-url-input" type="text" placeholder="Paste CSV URL from Google Sheets…" />
+        <button class="payment-url-btn" onclick="loadPaymentData()">Load</button>
+      </div>
+    </div>
+    <div id="pay-notice" class="pay-notice">
+      ⚠ No payment data loaded yet. Upload your <strong>RROW Upcoming Landowner Payments.xlsx</strong> to Google Sheets, publish it as CSV, then paste the URL above.
+    </div>
+    <div id="pay-kpi-row" class="payment-kpi-row" style="display:none;">
+      <div class="pay-kpi">
+        <p class="pay-kpi-val" id="pk-upcoming" style="color:var(--yellow);">–</p>
+        <p class="pay-kpi-lbl">Upcoming</p>
+      </div>
+      <div class="pay-kpi">
+        <p class="pay-kpi-val" id="pk-overdue" style="color:var(--red);">–</p>
+        <p class="pay-kpi-lbl">Overdue</p>
+      </div>
+      <div class="pay-kpi">
+        <p class="pay-kpi-val" id="pk-duetoday" style="color:#c05000;">–</p>
+        <p class="pay-kpi-lbl">Due Today</p>
+      </div>
+      <div class="pay-kpi">
+        <p class="pay-kpi-val" id="pk-duesoon" style="color:#7a5900;">–</p>
+        <p class="pay-kpi-lbl">Due Soon</p>
+      </div>
+    </div>
+    <div id="pay-filter-row" class="payment-filter-row" style="display:none;">
+      <button class="pay-filter pf-all"      onclick="filterPayments('all',this)">All</button>
+      <button class="pay-filter"             onclick="filterPayments('overdue',this)">Overdue</button>
+      <button class="pay-filter"             onclick="filterPayments('due today',this)">Due Today</button>
+      <button class="pay-filter"             onclick="filterPayments('due soon',this)">Due Soon</button>
+      <button class="pay-filter"             onclick="filterPayments('upcoming',this)">Upcoming</button>
+      <button class="pay-filter"             onclick="filterPayments('for review',this)">For Review</button>
+    </div>
+    <div class="payment-table-wrap">
+      <table class="payment-table" id="payment-table" style="display:none;">
+        <thead>
+          <tr>
+            <th>WTG #</th>
+            <th>Landowner Name</th>
+            <th>Barangay</th>
+            <th>Auth. Representative</th>
+            <th style="text-align:right;">Amount (PHP)</th>
+            <th>Due Date</th>
+            <th>Days Left</th>
+            <th>Status</th>
+            <th>Remarks</th>
+          </tr>
+        </thead>
+        <tbody id="payment-tbody"></tbody>
+      </table>
+      <div id="pay-empty" class="payment-empty" style="display:none;">No payments match the selected filter.</div>
     </div>
   </div>
 
@@ -820,6 +935,11 @@ async function loadData() {
     document.getElementById('loading-state').style.display = 'none';
     document.getElementById('dashboard').style.display     = 'block';
 
+    // Show payment notice if no payment data loaded yet
+    if (!paymentData.length) {
+      document.getElementById('pay-notice').classList.add('visible');
+    }
+
   } catch (err) {
     document.getElementById('loading-state').style.display = 'none';
     document.getElementById('error-state').style.display   = 'block';
@@ -831,6 +951,175 @@ async function loadData() {
 }
 
 loadData();
+
+// ── PAYMENT TRACKER ───────────────────────────────────────
+let paymentData = [];
+let payFilter = 'all';
+
+async function loadPaymentData() {
+  const input = document.getElementById('payment-csv-url').value.trim();
+  if (!input) return;
+  const url = input.includes('output=csv') ? input : input + (input.includes('?') ? '&' : '?') + 'output=csv';
+  const proxies = [
+    u => u,
+    u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+    u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+    u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`
+  ];
+  let text = null;
+  for (const build of proxies) {
+    try {
+      const res = await fetch(build(url), { cache: 'no-cache' });
+      if (res.ok) { const t = await res.text(); if (t.length > 50 && !t.includes('<html')) { text = t; break; } }
+    } catch(e) {}
+  }
+  if (!text) { alert('Could not fetch the payment CSV. Make sure the sheet is published as CSV and the URL is correct.'); return; }
+  processPaymentData(parseCSV(text));
+  renderPaymentTable();
+}
+
+function processPaymentData(rows) {
+  // Find header row containing key columns
+  let hIdx = -1, cm = {};
+  for (let i = 0; i < Math.min(rows.length, 10); i++) {
+    const r = rows[i].map(c => c.toUpperCase());
+    if (r.some(c => c.includes('LANDOWNER') || c.includes('PAYMENT TYPE')) && r.some(c => c.includes('STATUS'))) {
+      hIdx = i;
+      r.forEach((c, j) => {
+        if (c.includes('WTG') || c.includes('TURBINE')) cm.wtg = j;
+        if (c.includes('LANDOWNER') || c.includes('NAME')) cm.name = j;
+        if ((c.includes('BARANGAY') || c.includes('BRGY') || c.includes('LOCATION')) && cm.brgy === undefined) cm.brgy = j;
+        if (c.includes('AUTH') || c.includes('REPRESENTATIVE')) cm.authRep = j;
+        if (c.includes('AMOUNT')) cm.amt = j;
+        if (c.includes('NEXT') || c.includes('DUE DATE') || c.includes('DUE')) cm.due = j;
+        if (c.includes('STATUS')) cm.status = j;
+        if (c.includes('REMARK')) cm.rmk = j;
+      });
+      break;
+    }
+  }
+  // Fallback column map matching the Excel file column order:
+  // No.(0) WTG#(1) Landowner(2) AuthRep(3) Contact(4) Location(5) TCT(6) SQM(7) Amount(8) LeaseAR(9) Notarized(10) NextDue(11) Days(12) Status(13)
+  if (hIdx === -1) {
+    hIdx = 2; // row 3 is header (0-indexed = 2)
+    cm = { wtg:1, name:2, authRep:3, brgy:5, amt:8, due:11, status:13, rmk:14 };
+  }
+  const today = new Date(); today.setHours(0,0,0,0);
+  paymentData = [];
+  for (let i = hIdx + 1; i < rows.length; i++) {
+    const r = rows[i];
+    if (!r || r.length < 4) continue;
+    const wtg    = (r[cm.wtg]    || '').trim();
+    const status = (r[cm.status] || '').trim();
+    if (!wtg || !status) continue;
+    const dueStr = (r[cm.due] || '').trim();
+    let daysLeft = null;
+    if (dueStr) {
+      const d = new Date(dueStr); d.setHours(0,0,0,0);
+      if (!isNaN(d)) daysLeft = Math.round((d - today) / 86400000);
+    }
+    const rawAmt = (r[cm.amt] || '').replace(/,/g,'');
+    paymentData.push({
+      wtg, name: r[cm.name] || '', brgy: r[cm.brgy] || '',
+      authRep: r[cm.authRep] || '', amt: parseFloat(rawAmt) || 0,
+      due: dueStr, daysLeft, status,
+      rmk: r[cm.rmk] || ''
+    });
+  }
+  paymentData.sort((a, b) => {
+    const order = { 'overdue': 0, 'due today': 1, 'due soon': 2, 'upcoming': 3, 'for review': 4, 'no date': 5 };
+    const sa = order[(a.status || '').toLowerCase()] ?? 4;
+    const sb = order[(b.status || '').toLowerCase()] ?? 4;
+    if (sa !== sb) return sa - sb;
+    return (a.daysLeft ?? 9999) - (b.daysLeft ?? 9999);
+  });
+}
+
+function renderPaymentTable() {
+  if (!paymentData.length) return;
+
+  // KPI row
+  const counts = { upcoming:0, overdue:0, duetoday:0, duesoon:0 };
+  paymentData.forEach(p => {
+    const s = (p.status || '').toLowerCase();
+    if (s === 'upcoming') counts.upcoming++;
+    else if (s === 'overdue') counts.overdue++;
+    else if (s === 'due today') counts.duetoday++;
+    else if (s === 'due soon') counts.duesoon++;
+  });
+  document.getElementById('pk-upcoming').textContent  = counts.upcoming;
+  document.getElementById('pk-overdue').textContent   = counts.overdue;
+  document.getElementById('pk-duetoday').textContent  = counts.duetoday;
+  document.getElementById('pk-duesoon').textContent   = counts.duesoon;
+  document.getElementById('pay-kpi-row').style.display = '';
+  document.getElementById('pay-filter-row').style.display = '';
+  document.getElementById('payment-table').style.display = '';
+  document.getElementById('pay-notice').classList.remove('visible');
+
+  // Update filter button counts
+  const fb = document.getElementById('pay-filter-row');
+  fb.children[0].innerHTML = `All <span style="opacity:.65;">(${paymentData.length})</span>`;
+  fb.children[1].innerHTML = `Overdue <span style="opacity:.65;">(${counts.overdue})</span>`;
+  fb.children[2].innerHTML = `Due Today <span style="opacity:.65;">(${counts.duetoday})</span>`;
+  fb.children[3].innerHTML = `Due Soon <span style="opacity:.65;">(${counts.duesoon})</span>`;
+  fb.children[4].innerHTML = `Upcoming <span style="opacity:.65;">(${counts.upcoming})</span>`;
+  fb.children[5].innerHTML = `For Review`;
+
+  renderPaymentRows();
+}
+
+function renderPaymentRows() {
+  const tbody = document.getElementById('payment-tbody');
+  tbody.innerHTML = '';
+  const filtered = payFilter === 'all'
+    ? paymentData
+    : paymentData.filter(p => (p.status || '').toLowerCase() === payFilter);
+
+  document.getElementById('pay-empty').style.display = filtered.length ? 'none' : 'block';
+
+  filtered.forEach(p => {
+    const sl = (p.status || '').toLowerCase();
+    const statusClass = sl === 'overdue' ? 'ps-overdue' : sl === 'due today' ? 'ps-duetoday' : sl === 'due soon' ? 'ps-duesoon' : sl === 'upcoming' ? 'ps-upcoming' : sl === 'for review' ? 'ps-forreview' : 'ps-nodate';
+    let daysHtml = '–';
+    if (p.daysLeft !== null) {
+      const dc = p.daysLeft < 0 ? 'days-urgent' : p.daysLeft <= 14 ? 'days-soon' : 'days-ok';
+      const label = p.daysLeft < 0 ? `${Math.abs(p.daysLeft)}d overdue` : p.daysLeft === 0 ? 'Today' : `${p.daysLeft}d`;
+      daysHtml = `<span class="days-chip ${dc}">${label}</span>`;
+    }
+    const amtFmt = p.amt ? p.amt.toLocaleString('en-PH', { minimumFractionDigits:2, maximumFractionDigits:2 }) : '–';
+    const tr = document.createElement('tr');
+    tr.setAttribute('data-status', sl);
+    tr.innerHTML = `
+      <td class="col-wtg">${p.wtg}</td>
+      <td class="col-name">${p.name || '–'}</td>
+      <td>${p.brgy || '–'}</td>
+      <td>${p.authRep || '–'}</td>
+      <td style="text-align:right;font-variant-numeric:tabular-nums;">${amtFmt}</td>
+      <td style="white-space:nowrap;">${p.due || '–'}</td>
+      <td style="text-align:center;">${daysHtml}</td>
+      <td><span class="pay-status ${statusClass}">${p.status}</span></td>
+      <td style="font-size:10px;color:var(--text-muted);max-width:200px;">${p.rmk || '–'}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function filterPayments(type, btn) {
+  payFilter = type;
+  document.querySelectorAll('.pay-filter').forEach(b => {
+    b.className = 'pay-filter';
+  });
+  const clsMap = { all:'pf-all', overdue:'pf-overdue', 'due today':'pf-duetoday', 'due soon':'pf-duesoon', upcoming:'pf-upcoming', 'for review':'pf-forreview' };
+  btn.classList.add(clsMap[type] || 'pf-all');
+  renderPaymentRows();
+}
+
+// Show the notice banner once dashboard is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    const notice = document.getElementById('pay-notice');
+    if (notice && !paymentData.length) notice.classList.add('visible');
+  }, 2000);
+});
 </script>
 </body>
 </html>
