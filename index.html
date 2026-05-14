@@ -159,6 +159,7 @@
   .payment-filter-row { display: flex; gap: 7px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
   .pay-filter { font-size: 10px; font-weight: 600; padding: 3px 11px; border-radius: 20px; border: 1.5px solid var(--border); background: var(--white); color: var(--text-secondary); cursor: pointer; transition: all 0.15s; }
   .pay-filter:hover { border-color: var(--blue); color: var(--blue); }
+  .pay-filter.pf-urgent   { background: var(--red);    border-color: var(--red);    color: var(--white); }
   .pay-filter.pf-all      { background: var(--navy);   border-color: var(--navy);   color: var(--white); }
   .pay-filter.pf-upcoming { background: var(--yellow);  border-color: var(--yellow);  color: var(--white); }
   .pay-filter.pf-overdue  { background: var(--red);    border-color: var(--red);    color: var(--white); }
@@ -182,12 +183,20 @@
   .ps-duesoon   { background: #fff8d6; color: #7a5900; }
   .ps-forreview { background: #eeeeee; color: #444444; }
   .ps-nodate    { background: #f5f5f5; color: #888888; }
+  .ps-paid      { background: var(--green-bg); color: var(--green-text); }
+  .btn-mark-paid { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 12px; border: 1.5px solid var(--green); background: var(--white); color: var(--green-text); cursor: pointer; white-space: nowrap; transition: all 0.15s; }
+  .btn-mark-paid:hover { background: var(--green); color: var(--white); }
+  .btn-undo-paid { font-size: 10px; font-weight: 600; padding: 3px 10px; border-radius: 12px; border: 1.5px solid #aaa; background: var(--white); color: #666; cursor: pointer; white-space: nowrap; transition: all 0.15s; }
+  .btn-undo-paid:hover { border-color: var(--red); color: var(--red); }
+  .btn-mark-paid:hover { background: var(--green); color: var(--white); }
+  .btn-undo-paid { font-size: 10px; font-weight: 600; padding: 3px 9px; border-radius: 12px; border: 1.5px solid #aaa; background: var(--white); color: #666; cursor: pointer; white-space: nowrap; transition: all 0.15s; }
+  .btn-undo-paid:hover { border-color: var(--red); color: var(--red-text); }
   .days-chip { display: inline-block; font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 10px; }
   .days-urgent  { background: var(--red-bg);    color: var(--red-text); }
   .days-soon    { background: var(--yellow-bg); color: var(--yellow-text); }
   .days-ok      { background: var(--green-bg);  color: var(--green-text); }
   .payment-empty { text-align: center; padding: 2rem 1rem; font-size: 12px; color: var(--text-muted); font-style: italic; }
-  .payment-kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+  .payment-kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 14px; }
   .pay-kpi { background: var(--surface); border-radius: 6px; padding: 10px 12px; text-align: center; }
   .pay-kpi-val { font-size: 22px; font-weight: 700; line-height: 1.1; }
   .pay-kpi-lbl { font-size: 10px; color: var(--text-muted); margin-top: 2px; font-weight: 500; }
@@ -245,7 +254,7 @@
     .issue-list li { font-size: 10px; }
     .progress-meta { font-size: 11px; }
     .hint-text { font-size: 10px; }
-    .payment-kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .payment-kpi-row { grid-template-columns: repeat(3, 1fr); }
     .payment-url-input { width: 100%; }
     .payment-section-header { flex-direction: column; align-items: flex-start; }
     .payment-table th, .payment-table td { font-size: 10px; padding: 5px 7px; }
@@ -472,14 +481,20 @@
         <p class="pay-kpi-val" id="pk-duesoon" style="color:#7a5900;">–</p>
         <p class="pay-kpi-lbl">Due Soon</p>
       </div>
+      <div class="pay-kpi">
+        <p class="pay-kpi-val" id="pk-paid" style="color:var(--green);">–</p>
+        <p class="pay-kpi-lbl">Paid</p>
+      </div>
     </div>
     <div id="pay-filter-row" class="payment-filter-row" style="display:none;">
-      <button class="pay-filter pf-all"      onclick="filterPayments('all',this)">All</button>
+      <button class="pay-filter pf-urgent"   onclick="filterPayments('urgent',this)">⚠ Urgent</button>
+      <button class="pay-filter"             onclick="filterPayments('all',this)">All</button>
       <button class="pay-filter"             onclick="filterPayments('overdue',this)">Overdue</button>
       <button class="pay-filter"             onclick="filterPayments('due today',this)">Due Today</button>
       <button class="pay-filter"             onclick="filterPayments('due soon',this)">Due Soon</button>
       <button class="pay-filter"             onclick="filterPayments('upcoming',this)">Upcoming</button>
       <button class="pay-filter"             onclick="filterPayments('for review',this)">For Review</button>
+      <button class="pay-filter"             onclick="filterPayments('paid',this)">Paid</button>
     </div>
     <div class="payment-table-wrap">
       <table class="payment-table" id="payment-table" style="display:none;">
@@ -493,7 +508,7 @@
             <th>Due Date</th>
             <th>Days Left</th>
             <th>Status</th>
-            <th>Remarks</th>
+            <th style="text-align:center;">Action</th>
           </tr>
         </thead>
         <tbody id="payment-tbody"></tbody>
@@ -950,7 +965,7 @@ loadData();
 // ── PAYMENT TRACKER ───────────────────────────────────────
 const PAYMENT_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS_kq-vFu7xs5fpbbBkwzsQy3wfKEPKO5HV5hhGePUTcuhP9DpQaKsaMPkc4cdai834IO_iiixmveXZ/pub?gid=1962254682&single=true&output=csv';
 let paymentData = [];
-let payFilter = 'all';
+let payFilter = 'urgent';
 
 async function loadPaymentData() {
   const url = PAYMENT_CSV_URL;
@@ -969,6 +984,34 @@ async function loadPaymentData() {
   }
   if (!text) { alert('Could not fetch the payment CSV. Make sure the sheet is published as CSV and the URL is correct.'); return; }
   processPaymentData(parseCSV(text));
+  renderPaymentTable();
+}
+
+// ── PAID OVERRIDES (localStorage) ────────────────────────
+const PAID_KEY = 'rrow_paid_landowners';
+function getPaidMap() {
+  try { return JSON.parse(localStorage.getItem(PAID_KEY) || '{}'); } catch { return {}; }
+}
+function setPaidMap(map) { localStorage.setItem(PAID_KEY, JSON.stringify(map)); }
+function paidRecordKey(p) { return `${p.wtg}||${p.name}`; }
+
+function markAsPaid(key) {
+  const map = getPaidMap();
+  const rec = paymentData.find(p => paidRecordKey(p) === key);
+  if (!rec) return;
+  map[key] = rec.status;          // save original status so undo works
+  setPaidMap(map);
+  rec.status = 'Paid';
+  renderPaymentTable();
+}
+
+function undoMarkPaid(key) {
+  const map = getPaidMap();
+  const original = map[key] || 'Upcoming';
+  delete map[key];
+  setPaidMap(map);
+  const rec = paymentData.find(p => paidRecordKey(p) === key);
+  if (rec) rec.status = original;
   renderPaymentTable();
 }
 
@@ -1020,8 +1063,12 @@ function processPaymentData(rows) {
       rmk: r[cm.rmk] || ''
     });
   }
+  // Apply any locally saved paid overrides
+  const paidMap = getPaidMap();
+  paymentData.forEach(p => { if (paidMap[paidRecordKey(p)] !== undefined) p.status = 'Paid'; });
+
   paymentData.sort((a, b) => {
-    const order = { 'overdue': 0, 'due today': 1, 'due soon': 2, 'upcoming': 3, 'for review': 4, 'no date': 5 };
+    const order = { 'overdue': 0, 'due today': 1, 'due soon': 2, 'upcoming': 3, 'for review': 4, 'no date': 5, 'paid': 6 };
     const sa = order[(a.status || '').toLowerCase()] ?? 4;
     const sb = order[(b.status || '').toLowerCase()] ?? 4;
     if (sa !== sb) return sa - sb;
@@ -1034,31 +1081,38 @@ function renderPaymentTable() {
   if (!paymentData.length) return;
 
   // KPI row
-  const counts = { upcoming:0, overdue:0, duetoday:0, duesoon:0 };
+  const counts = { upcoming:0, overdue:0, duetoday:0, duesoon:0, paid:0 };
   paymentData.forEach(p => {
     const s = (p.status || '').toLowerCase();
     if (s === 'upcoming') counts.upcoming++;
     else if (s === 'overdue') counts.overdue++;
     else if (s === 'due today') counts.duetoday++;
     else if (s === 'due soon') counts.duesoon++;
+    else if (s === 'paid') counts.paid++;
   });
   document.getElementById('pk-upcoming').textContent  = counts.upcoming;
   document.getElementById('pk-overdue').textContent   = counts.overdue;
   document.getElementById('pk-duetoday').textContent  = counts.duetoday;
   document.getElementById('pk-duesoon').textContent   = counts.duesoon;
+  document.getElementById('pk-paid').textContent      = counts.paid;
   document.getElementById('pay-kpi-row').style.display = '';
   document.getElementById('pay-filter-row').style.display = '';
   document.getElementById('payment-table').style.display = '';
-  document.getElementById('pay-notice').classList.remove('visible');
 
   // Update filter button counts
+  const urgentCount = counts.overdue + counts.duetoday + counts.duesoon;
   const fb = document.getElementById('pay-filter-row');
-  fb.children[0].innerHTML = `All <span style="opacity:.65;">(${paymentData.length})</span>`;
-  fb.children[1].innerHTML = `Overdue <span style="opacity:.65;">(${counts.overdue})</span>`;
-  fb.children[2].innerHTML = `Due Today <span style="opacity:.65;">(${counts.duetoday})</span>`;
-  fb.children[3].innerHTML = `Due Soon <span style="opacity:.65;">(${counts.duesoon})</span>`;
-  fb.children[4].innerHTML = `Upcoming <span style="opacity:.65;">(${counts.upcoming})</span>`;
-  fb.children[5].innerHTML = `For Review`;
+  fb.children[0].innerHTML = `⚠ Urgent <span style="opacity:.65;">(${urgentCount})</span>`;
+  fb.children[1].innerHTML = `All <span style="opacity:.65;">(${paymentData.length})</span>`;
+  fb.children[2].innerHTML = `Overdue <span style="opacity:.65;">(${counts.overdue})</span>`;
+  fb.children[3].innerHTML = `Due Today <span style="opacity:.65;">(${counts.duetoday})</span>`;
+  fb.children[4].innerHTML = `Due Soon <span style="opacity:.65;">(${counts.duesoon})</span>`;
+  fb.children[5].innerHTML = `Upcoming <span style="opacity:.65;">(${counts.upcoming})</span>`;
+  fb.children[6].innerHTML = `For Review`;
+  fb.children[7].innerHTML = `Paid <span style="opacity:.65;">(${counts.paid})</span>`;
+  // Activate Urgent button by default
+  document.querySelectorAll('.pay-filter').forEach(b => b.className = 'pay-filter');
+  fb.children[0].classList.add('pf-urgent');
 
   renderPaymentRows();
 }
@@ -1066,15 +1120,18 @@ function renderPaymentTable() {
 function renderPaymentRows() {
   const tbody = document.getElementById('payment-tbody');
   tbody.innerHTML = '';
+  const urgentStatuses = ['overdue', 'due today', 'due soon'];
   const filtered = payFilter === 'all'
     ? paymentData
-    : paymentData.filter(p => (p.status || '').toLowerCase() === payFilter);
+    : payFilter === 'urgent'
+      ? paymentData.filter(p => urgentStatuses.includes((p.status || '').toLowerCase()))
+      : paymentData.filter(p => (p.status || '').toLowerCase() === payFilter);
 
   document.getElementById('pay-empty').style.display = filtered.length ? 'none' : 'block';
 
   filtered.forEach(p => {
     const sl = (p.status || '').toLowerCase();
-    const statusClass = sl === 'overdue' ? 'ps-overdue' : sl === 'due today' ? 'ps-duetoday' : sl === 'due soon' ? 'ps-duesoon' : sl === 'upcoming' ? 'ps-upcoming' : sl === 'for review' ? 'ps-forreview' : 'ps-nodate';
+    const statusClass = sl === 'overdue' ? 'ps-overdue' : sl === 'due today' ? 'ps-duetoday' : sl === 'due soon' ? 'ps-duesoon' : sl === 'upcoming' ? 'ps-upcoming' : sl === 'for review' ? 'ps-forreview' : sl === 'paid' ? 'ps-paid' : 'ps-nodate';
     let daysHtml = '–';
     if (p.daysLeft !== null) {
       const dc = p.daysLeft < 0 ? 'days-urgent' : p.daysLeft <= 14 ? 'days-soon' : 'days-ok';
@@ -1082,6 +1139,11 @@ function renderPaymentRows() {
       daysHtml = `<span class="days-chip ${dc}">${label}</span>`;
     }
     const amtFmt = p.amt ? p.amt.toLocaleString('en-PH', { minimumFractionDigits:2, maximumFractionDigits:2 }) : '–';
+    const key = paidRecordKey(p).replace(/'/g, "\\'");
+    const isPaid = sl === 'paid';
+    const actionBtn = isPaid
+      ? `<button class="btn-undo-paid" onclick="undoMarkPaid('${key}')">↩ Undo</button>`
+      : `<button class="btn-mark-paid" onclick="markAsPaid('${key}')">✓ Mark Paid</button>`;
     const tr = document.createElement('tr');
     tr.setAttribute('data-status', sl);
     tr.innerHTML = `
@@ -1093,7 +1155,7 @@ function renderPaymentRows() {
       <td style="white-space:nowrap;">${p.due || '–'}</td>
       <td style="text-align:center;">${daysHtml}</td>
       <td><span class="pay-status ${statusClass}">${p.status}</span></td>
-      <td style="font-size:10px;color:var(--text-muted);max-width:200px;">${p.rmk || '–'}</td>`;
+      <td style="text-align:center;">${actionBtn}</td>`;
     tbody.appendChild(tr);
   });
 }
@@ -1103,7 +1165,7 @@ function filterPayments(type, btn) {
   document.querySelectorAll('.pay-filter').forEach(b => {
     b.className = 'pay-filter';
   });
-  const clsMap = { all:'pf-all', overdue:'pf-overdue', 'due today':'pf-duetoday', 'due soon':'pf-duesoon', upcoming:'pf-upcoming', 'for review':'pf-forreview' };
+  const clsMap = { urgent:'pf-urgent', all:'pf-all', overdue:'pf-overdue', 'due today':'pf-duetoday', 'due soon':'pf-duesoon', upcoming:'pf-upcoming', 'for review':'pf-forreview', paid:'pf-paid' };
   btn.classList.add(clsMap[type] || 'pf-all');
   renderPaymentRows();
 }
