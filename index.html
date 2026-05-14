@@ -136,6 +136,21 @@
   .rrow-table tr:last-child td { border-bottom: none; }
   .rrow-table td:first-child { font-weight: 700; color: var(--navy); white-space: nowrap; }
 
+  /* CP DRILL-DOWN PANEL */
+  .cp-panel { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px; display: none; animation: slideIn 0.18s ease; }
+  .cp-panel.visible { display: block; }
+  .cp-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .cp-panel-label { font-size: 11px; font-weight: 700; color: var(--navy); display: flex; align-items: center; gap: 6px; }
+  .cp-panel-dot { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
+  .cp-panel-close { background: none; border: none; cursor: pointer; font-size: 13px; color: var(--text-muted); padding: 1px 4px; border-radius: 3px; }
+  .cp-panel-close:hover { background: var(--surface); color: var(--navy); }
+  .cp-panel-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .cp-chip { display: inline-flex; flex-direction: column; align-items: flex-start; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; cursor: pointer; transition: border-color 0.12s, box-shadow 0.12s; min-width: 72px; }
+  .cp-chip:hover { border-color: var(--blue); box-shadow: 0 2px 6px rgba(35,137,212,0.15); }
+  .cp-chip-id { font-size: 11px; font-weight: 700; color: var(--navy); }
+  .cp-chip-txt { font-size: 9px; color: var(--text-muted); margin-top: 2px; max-width: 110px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cp-hint { font-size: 10px; color: var(--text-muted); font-style: italic; margin-top: 6px; }
+
   /* BLOCKERS */
   .issues-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 1.75rem; }
   .issue-card { background: var(--white); border: 1px solid var(--border); border-left: 3px solid var(--blue); border-radius: 8px; padding: 1rem 1.125rem; }
@@ -466,7 +481,15 @@
       <p class="chart-subtitle">Breakdown across all WTGs</p>
       <div class="legend-row" id="cp-legend"></div>
       <div style="position:relative;height:190px;">
-        <canvas id="cpChart"></canvas>
+        <canvas id="cpChart" style="cursor:pointer;"></canvas>
+      </div>
+      <p class="cp-hint">↑ Click a bar to see which WTGs</p>
+      <div class="cp-panel" id="cp-panel">
+        <div class="cp-panel-header">
+          <span class="cp-panel-label"><span class="cp-panel-dot" id="cp-panel-dot"></span><span id="cp-panel-title"></span></span>
+          <button class="cp-panel-close" onclick="closeCPPanel()">✕</button>
+        </div>
+        <div class="cp-panel-chips" id="cp-panel-chips"></div>
       </div>
     </div>
   </div>
@@ -629,7 +652,8 @@ function detectRROWCat(rrow, status) {
   return 'inprogress';
 }
 
-function detectCPCat(cp) {
+function detectCPCat(cp, status) {
+  if (status === 'cancelled') return 'cancelled';
   const c = (cp || '').toUpperCase();
   if (c.includes('DONE') || c.includes('COMPLETED')) return 'done';
   if (c.includes('PARTIAL')) return 'partial';
@@ -711,7 +735,7 @@ function processData(rows) {
       tree   : r[colMap.tree]    || 'N/A',
       remarks,
       rrowCat: detectRROWCat(rrow, status),
-      cpCat  : detectCPCat(cp)
+      cpCat  : detectCPCat(cp, status)
     });
   }
 
@@ -843,7 +867,7 @@ function renderCharts() {
   const cpLabels = { done:'Done', partial:'Partial', boundary:'Boundary issues', pending:'Pending', cancelled:'Cancelled' };
   const cpKeys   = Object.keys(cpCounts).filter(k => cpCounts[k] > 0);
   const cpLegend = document.getElementById('cp-legend');
-  cpLegend.innerHTML = cpKeys.map(k => `<div class="legend-item"><div class="legend-dot" style="background:${cpColors[k]};${k==='pending'?'border:1px solid #d4a017;':''}"></div>${cpLabels[k]} (${cpCounts[k]})</div>`).join('');
+  cpLegend.innerHTML = cpKeys.map(k => `<div class="legend-item" onclick="showCPPanel('${k}','${cpColors[k]}','${cpLabels[k]}')" title="Click to list WTGs"><div class="legend-dot" style="background:${cpColors[k]};${k==='pending'?'border:1px solid #d4a017;':''}"></div>${cpLabels[k]} (${cpCounts[k]})</div>`).join('');
 
   cpChartInstance = new Chart(document.getElementById('cpChart'), {
     type: 'bar',
@@ -853,13 +877,44 @@ function renderCharts() {
     },
     options: {
       indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ' ' + ctx.raw + ' WTGs' } } },
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ' ' + ctx.raw + ' WTGs — click to view' } }
+      },
       scales: {
         x: { grid: { color: 'rgba(27,45,110,0.07)' }, ticks: { font:{ size:11 }, color:'#5a6a99', stepSize:2 } },
         y: { grid: { display:false }, ticks: { font:{ size:11 }, color:'#5a6a99' } }
+      },
+      onClick(evt, elements) {
+        if (!elements.length) return;
+        const key = cpKeys[elements[0].index];
+        showCPPanel(key, cpColors[key], cpLabels[key]);
       }
     }
   });
+}
+
+let activeCPKey = null;
+function showCPPanel(key, color, label) {
+  if (activeCPKey === key) { closeCPPanel(); return; }
+  activeCPKey = key;
+  const wtgs = wtgData.filter(w => w.cpCat === key);
+  document.getElementById('cp-panel-dot').style.background = color;
+  document.getElementById('cp-panel-title').textContent = label + ' — ' + wtgs.length + ' WTG' + (wtgs.length !== 1 ? 's' : '');
+  const chips = document.getElementById('cp-panel-chips');
+  chips.innerHTML = wtgs.map(w =>
+    `<div class="cp-chip" onclick="selectWTG('${w.id}'); closeCPPanel();">
+      <span class="cp-chip-id">WTG ${w.id}</span>
+      <span class="cp-chip-txt" title="${w.cp || ''}">${w.cp || '—'}</span>
+    </div>`
+  ).join('');
+  document.getElementById('cp-panel').classList.add('visible');
+  document.querySelector('.cp-hint').style.display = 'none';
+}
+function closeCPPanel() {
+  activeCPKey = null;
+  document.getElementById('cp-panel').classList.remove('visible');
+  document.querySelector('.cp-hint').style.display = '';
 }
 
 // ── WTG INTERACTION ───────────────────────────────────────
