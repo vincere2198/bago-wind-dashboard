@@ -165,9 +165,10 @@
   .pay-filter.pf-overdue  { background: var(--red);    border-color: var(--red);    color: var(--white); }
   .pay-filter.pf-duetoday { background: #c05000; border-color: #c05000; color: var(--white); }
   .pay-filter.pf-duesoon  { background: #7a5900; border-color: #7a5900; color: var(--white); }
-  .pay-filter.pf-forreview{ background: #555;    border-color: #555;    color: var(--white); }
-  .pay-filter.pf-process  { background: var(--blue);   border-color: var(--blue);   color: var(--white); }
-  .pay-filter.pf-paid     { background: var(--green);  border-color: var(--green);  color: var(--white); }
+  .pay-filter.pf-forreview { background: #555;    border-color: #555;    color: var(--white); }
+  .pay-filter.pf-process   { background: var(--blue);   border-color: var(--blue);   color: var(--white); }
+  .pay-filter.pf-advlease  { background: #5a2d91; border-color: #5a2d91; color: var(--white); }
+  .pay-filter.pf-paid      { background: var(--green);  border-color: var(--green);  color: var(--white); }
   .payment-table-wrap { overflow-x: auto; }
   .payment-table { width: 100%; border-collapse: collapse; font-size: 11px; }
   .payment-table th { text-align: left; color: var(--text-muted); font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; padding: 6px 10px; border-bottom: 2px solid var(--border); white-space: nowrap; background: var(--surface); }
@@ -176,14 +177,36 @@
   .payment-table tr:hover td { background: var(--surface); }
   .payment-table td.col-wtg { font-weight: 700; color: var(--navy); white-space: nowrap; }
   .payment-table td.col-name { font-weight: 600; color: var(--text-primary); }
+  .col-name-link { cursor: pointer; border-bottom: 1px dashed var(--blue); color: var(--navy); }
+  .col-name-link:hover { color: var(--blue); }
+  /* Payment history popover */
+  .pay-pop { position: fixed; z-index: 9999; width: 260px; background: var(--white); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 8px 28px rgba(0,0,0,0.14); font-size: 11px; display: none; }
+  .pay-pop.visible { display: block; }
+  .pay-pop-header { background: var(--navy); color: var(--white); border-radius: 9px 9px 0 0; padding: 10px 12px 8px; }
+  .pay-pop-name { font-weight: 700; font-size: 12px; line-height: 1.3; }
+  .pay-pop-sub { font-size: 10px; opacity: .75; margin-top: 2px; }
+  .pay-pop-body { padding: 10px 12px; }
+  .pay-pop-row { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 0.5px solid var(--border); color: var(--text-secondary); }
+  .pay-pop-row:last-child { border-bottom: none; }
+  .pay-pop-row .lbl { color: var(--text-muted); font-size: 10px; }
+  .pay-pop-row .val { font-weight: 600; color: var(--text-primary); text-align: right; }
+  .pay-pop-hist { margin-top: 8px; }
+  .pay-pop-hist-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); margin-bottom: 5px; }
+  .pay-pop-hist-item { display: flex; align-items: center; gap: 6px; padding: 4px 0; border-bottom: 0.5px solid var(--border); }
+  .pay-pop-hist-item:last-child { border-bottom: none; }
+  .pay-pop-hist-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+  .pay-pop-hist-empty { font-size: 10px; color: var(--text-muted); font-style: italic; padding: 4px 0; }
+  .pay-pop-close { position: absolute; top: 7px; right: 10px; background: none; border: none; color: rgba(255,255,255,.7); font-size: 14px; cursor: pointer; line-height: 1; padding: 2px 4px; }
+  .pay-pop-close:hover { color: var(--white); }
   .pay-status { display: inline-block; font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
   .ps-upcoming  { background: var(--yellow-bg); color: var(--yellow-text); }
   .ps-overdue   { background: var(--red-bg);    color: var(--red-text); }
   .ps-duetoday  { background: #ffe8d6; color: #c05000; }
   .ps-duesoon   { background: #fff8d6; color: #7a5900; }
-  .ps-forreview { background: #eeeeee; color: #444444; }
-  .ps-nodate    { background: #f5f5f5; color: #888888; }
-  .ps-paid      { background: var(--green-bg); color: var(--green-text); }
+  .ps-forreview  { background: #eeeeee; color: #444444; }
+  .ps-nodate     { background: #f5f5f5; color: #888888; }
+  .ps-advlease   { background: #f0e8ff; color: #5a2d91; }
+  .ps-paid       { background: var(--green-bg); color: var(--green-text); }
   .btn-mark-paid { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 12px; border: 1.5px solid var(--green); background: var(--white); color: var(--green-text); cursor: pointer; white-space: nowrap; transition: all 0.15s; }
   .btn-mark-paid:hover { background: var(--green); color: var(--white); }
   .btn-undo-paid { font-size: 10px; font-weight: 600; padding: 3px 10px; border-radius: 12px; border: 1.5px solid #aaa; background: var(--white); color: #666; cursor: pointer; white-space: nowrap; transition: all 0.15s; }
@@ -494,6 +517,7 @@
       <button class="pay-filter"             onclick="filterPayments('due soon',this)">Due Soon</button>
       <button class="pay-filter"             onclick="filterPayments('upcoming',this)">Upcoming</button>
       <button class="pay-filter"             onclick="filterPayments('for review',this)">For Review</button>
+      <button class="pay-filter"             onclick="filterPayments('advance lease',this)">Advance Lease</button>
       <button class="pay-filter"             onclick="filterPayments('paid',this)">Paid</button>
     </div>
     <div class="payment-table-wrap">
@@ -514,6 +538,22 @@
         <tbody id="payment-tbody"></tbody>
       </table>
       <div id="pay-empty" class="payment-empty" style="display:none;">No payments match the selected filter.</div>
+    </div>
+  </div>
+
+  <!-- Payment History Popover -->
+  <div id="pay-pop" class="pay-pop" role="tooltip">
+    <div class="pay-pop-header">
+      <button class="pay-pop-close" onclick="closePayPop()">✕</button>
+      <div class="pay-pop-name" id="pop-name"></div>
+      <div class="pay-pop-sub" id="pop-sub"></div>
+    </div>
+    <div class="pay-pop-body">
+      <div id="pop-info"></div>
+      <div class="pay-pop-hist">
+        <div class="pay-pop-hist-title">Payment History</div>
+        <div id="pop-history"></div>
+      </div>
     </div>
   </div>
 
@@ -963,7 +1003,7 @@ async function loadData() {
 loadData();
 
 // ── PAYMENT TRACKER ───────────────────────────────────────
-const PAYMENT_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS_kq-vFu7xs5fpbbBkwzsQy3wfKEPKO5HV5hhGePUTcuhP9DpQaKsaMPkc4cdai834IO_iiixmveXZ/pub?gid=1962254682&single=true&output=csv';
+const PAYMENT_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQFeHZ3V7Il90NqXZ5R3kdDc8uhaZ69mK78EvZCqy3czTAXE8riemsFBa5Y3DKapLjdoGIHryhbkxWS/pub?output=csv';
 let paymentData = [];
 let payFilter = 'urgent';
 
@@ -999,7 +1039,15 @@ function markAsPaid(key) {
   const map = getPaidMap();
   const rec = paymentData.find(p => paidRecordKey(p) === key);
   if (!rec) return;
-  map[key] = rec.status;          // save original status so undo works
+  const entry = map[key] || { originalStatus: rec.status, history: [] };
+  entry.originalStatus = entry.originalStatus || rec.status;
+  entry.history = entry.history || [];
+  entry.history.push({
+    on: new Date().toLocaleDateString('en-PH', { year:'numeric', month:'short', day:'numeric' }),
+    due: rec.due || '–',
+    amt: rec.amt || 0
+  });
+  map[key] = entry;
   setPaidMap(map);
   rec.status = 'Paid';
   renderPaymentTable();
@@ -1007,13 +1055,73 @@ function markAsPaid(key) {
 
 function undoMarkPaid(key) {
   const map = getPaidMap();
-  const original = map[key] || 'Upcoming';
-  delete map[key];
+  const entry = map[key];
+  const original = (entry && entry.originalStatus) ? entry.originalStatus : 'Upcoming';
+  // Remove last history entry on undo
+  if (entry && entry.history && entry.history.length > 0) {
+    entry.history.pop();
+    if (entry.history.length === 0) { delete map[key]; } else { map[key] = entry; }
+  } else { delete map[key]; }
   setPaidMap(map);
   const rec = paymentData.find(p => paidRecordKey(p) === key);
   if (rec) rec.status = original;
   renderPaymentTable();
 }
+
+function showPayPop(key, el) {
+  const rec = paymentData.find(p => paidRecordKey(p) === key);
+  if (!rec) return;
+  const map = getPaidMap();
+  const entry = map[key] || {};
+  const history = entry.history || [];
+
+  document.getElementById('pop-name').textContent = rec.name || '–';
+  document.getElementById('pop-sub').textContent  = `${rec.wtg}  ·  ${rec.brgy || '–'}`;
+
+  const amtFmt = rec.amt ? rec.amt.toLocaleString('en-PH', { minimumFractionDigits:2, maximumFractionDigits:2 }) : '–';
+  document.getElementById('pop-info').innerHTML = `
+    <div class="pay-pop-row"><span class="lbl">Annual Amount</span><span class="val">₱ ${amtFmt}</span></div>
+    <div class="pay-pop-row"><span class="lbl">Next Due Date</span><span class="val">${rec.due || '–'}</span></div>
+    <div class="pay-pop-row"><span class="lbl">Auth. Rep.</span><span class="val">${rec.authRep || '–'}</span></div>`;
+
+  const histEl = document.getElementById('pop-history');
+  if (history.length === 0) {
+    histEl.innerHTML = '<div class="pay-pop-hist-empty">No payments recorded yet.</div>';
+  } else {
+    histEl.innerHTML = history.slice().reverse().map(h => {
+      const hAmt = h.amt ? h.amt.toLocaleString('en-PH', { minimumFractionDigits:2, maximumFractionDigits:2 }) : '–';
+      return `<div class="pay-pop-hist-item">
+        <div class="pay-pop-hist-dot"></div>
+        <div><div style="font-weight:600;color:var(--text-primary);">₱ ${hAmt}</div>
+        <div style="font-size:10px;color:var(--text-muted);">Paid ${h.on} · Due ${h.due}</div></div>
+      </div>`;
+    }).join('');
+  }
+
+  const pop = document.getElementById('pay-pop');
+  pop.classList.add('visible');
+  // Position near clicked element
+  const rect = el.getBoundingClientRect();
+  const popW = 260, popH = 280;
+  let top = rect.bottom + 6 + window.scrollY;
+  let left = rect.left + window.scrollX;
+  if (left + popW > window.innerWidth - 10) left = window.innerWidth - popW - 10;
+  if (top + popH > window.scrollY + window.innerHeight - 10) top = rect.top + window.scrollY - popH - 6;
+  pop.style.top  = top + 'px';
+  pop.style.left = left + 'px';
+}
+
+function closePayPop() {
+  document.getElementById('pay-pop').classList.remove('visible');
+}
+
+// Close popover when clicking outside
+document.addEventListener('click', e => {
+  const pop = document.getElementById('pay-pop');
+  if (pop && pop.classList.contains('visible') && !pop.contains(e.target) && !e.target.closest('.col-name-link')) {
+    closePayPop();
+  }
+});
 
 function processPaymentData(rows) {
   // Find header row containing key columns
@@ -1065,10 +1173,13 @@ function processPaymentData(rows) {
   }
   // Apply any locally saved paid overrides
   const paidMap = getPaidMap();
-  paymentData.forEach(p => { if (paidMap[paidRecordKey(p)] !== undefined) p.status = 'Paid'; });
+  paymentData.forEach(p => {
+    const entry = paidMap[paidRecordKey(p)];
+    if (entry && (entry.history || []).length > 0) p.status = 'Paid';
+  });
 
   paymentData.sort((a, b) => {
-    const order = { 'overdue': 0, 'due today': 1, 'due soon': 2, 'upcoming': 3, 'for review': 4, 'no date': 5, 'paid': 6 };
+    const order = { 'overdue': 0, 'due today': 1, 'due soon': 2, 'upcoming': 3, 'for review': 4, 'advance lease': 5, 'no date': 6, 'paid': 7 };
     const sa = order[(a.status || '').toLowerCase()] ?? 4;
     const sb = order[(b.status || '').toLowerCase()] ?? 4;
     if (sa !== sb) return sa - sb;
@@ -1081,13 +1192,14 @@ function renderPaymentTable() {
   if (!paymentData.length) return;
 
   // KPI row
-  const counts = { upcoming:0, overdue:0, duetoday:0, duesoon:0, paid:0 };
+  const counts = { upcoming:0, overdue:0, duetoday:0, duesoon:0, advlease:0, paid:0 };
   paymentData.forEach(p => {
     const s = (p.status || '').toLowerCase();
     if (s === 'upcoming') counts.upcoming++;
     else if (s === 'overdue') counts.overdue++;
     else if (s === 'due today') counts.duetoday++;
     else if (s === 'due soon') counts.duesoon++;
+    else if (s === 'advance lease') counts.advlease++;
     else if (s === 'paid') counts.paid++;
   });
   document.getElementById('pk-upcoming').textContent  = counts.upcoming;
@@ -1109,7 +1221,8 @@ function renderPaymentTable() {
   fb.children[4].innerHTML = `Due Soon <span style="opacity:.65;">(${counts.duesoon})</span>`;
   fb.children[5].innerHTML = `Upcoming <span style="opacity:.65;">(${counts.upcoming})</span>`;
   fb.children[6].innerHTML = `For Review`;
-  fb.children[7].innerHTML = `Paid <span style="opacity:.65;">(${counts.paid})</span>`;
+  fb.children[7].innerHTML = `Advance Lease <span style="opacity:.65;">(${counts.advlease})</span>`;
+  fb.children[8].innerHTML = `Paid <span style="opacity:.65;">(${counts.paid})</span>`;
   // Activate Urgent button by default
   document.querySelectorAll('.pay-filter').forEach(b => b.className = 'pay-filter');
   fb.children[0].classList.add('pf-urgent');
@@ -1131,7 +1244,7 @@ function renderPaymentRows() {
 
   filtered.forEach(p => {
     const sl = (p.status || '').toLowerCase();
-    const statusClass = sl === 'overdue' ? 'ps-overdue' : sl === 'due today' ? 'ps-duetoday' : sl === 'due soon' ? 'ps-duesoon' : sl === 'upcoming' ? 'ps-upcoming' : sl === 'for review' ? 'ps-forreview' : sl === 'paid' ? 'ps-paid' : 'ps-nodate';
+    const statusClass = sl === 'overdue' ? 'ps-overdue' : sl === 'due today' ? 'ps-duetoday' : sl === 'due soon' ? 'ps-duesoon' : sl === 'upcoming' ? 'ps-upcoming' : sl === 'for review' ? 'ps-forreview' : sl === 'advance lease' ? 'ps-advlease' : sl === 'paid' ? 'ps-paid' : 'ps-nodate';
     let daysHtml = '–';
     if (p.daysLeft !== null) {
       const dc = p.daysLeft < 0 ? 'days-urgent' : p.daysLeft <= 14 ? 'days-soon' : 'days-ok';
@@ -1148,7 +1261,7 @@ function renderPaymentRows() {
     tr.setAttribute('data-status', sl);
     tr.innerHTML = `
       <td class="col-wtg">${p.wtg}</td>
-      <td class="col-name">${p.name || '–'}</td>
+      <td class="col-name"><span class="col-name-link" onclick="showPayPop('${paidRecordKey(p).replace(/'/g,"\\'")}',this)">${p.name || '–'}</span></td>
       <td>${p.brgy || '–'}</td>
       <td>${p.authRep || '–'}</td>
       <td style="text-align:right;font-variant-numeric:tabular-nums;">${amtFmt}</td>
@@ -1165,7 +1278,7 @@ function filterPayments(type, btn) {
   document.querySelectorAll('.pay-filter').forEach(b => {
     b.className = 'pay-filter';
   });
-  const clsMap = { urgent:'pf-urgent', all:'pf-all', overdue:'pf-overdue', 'due today':'pf-duetoday', 'due soon':'pf-duesoon', upcoming:'pf-upcoming', 'for review':'pf-forreview', paid:'pf-paid' };
+  const clsMap = { urgent:'pf-urgent', all:'pf-all', overdue:'pf-overdue', 'due today':'pf-duetoday', 'due soon':'pf-duesoon', upcoming:'pf-upcoming', 'for review':'pf-forreview', 'advance lease':'pf-advlease', paid:'pf-paid' };
   btn.classList.add(clsMap[type] || 'pf-all');
   renderPaymentRows();
 }
