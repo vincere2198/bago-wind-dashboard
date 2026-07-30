@@ -195,12 +195,12 @@
   .col-name-link { cursor: pointer; border-bottom: 1px dashed var(--blue); color: var(--navy); }
   .col-name-link:hover { color: var(--blue); }
   /* Payment history popover */
-  .pay-pop { position: fixed; z-index: 9999; width: 260px; background: var(--white); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 8px 28px rgba(0,0,0,0.14); font-size: 11px; display: none; }
+  .pay-pop { position: fixed; z-index: 9999; width: 280px; background: var(--white); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 8px 28px rgba(0,0,0,0.14); font-size: 11px; display: none; }
   .pay-pop.visible { display: block; }
   .pay-pop-header { background: var(--navy); color: var(--white); border-radius: 9px 9px 0 0; padding: 10px 12px 8px; }
   .pay-pop-name { font-weight: 700; font-size: 12px; line-height: 1.3; }
   .pay-pop-sub { font-size: 10px; opacity: .75; margin-top: 2px; }
-  .pay-pop-body { padding: 10px 12px; }
+  .pay-pop-body { padding: 10px 12px; max-height: 70vh; overflow-y: auto; }
   .pay-pop-row { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 0.5px solid var(--border); color: var(--text-secondary); }
   .pay-pop-row:last-child { border-bottom: none; }
   .pay-pop-row .lbl { color: var(--text-muted); font-size: 10px; }
@@ -211,6 +211,17 @@
   .pay-pop-hist-item:last-child { border-bottom: none; }
   .pay-pop-hist-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
   .pay-pop-hist-empty { font-size: 10px; color: var(--text-muted); font-style: italic; padding: 4px 0; }
+  .pay-pop-esc { margin-top: 8px; }
+  .pay-pop-esc-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); margin-bottom: 5px; }
+  .pay-pop-esc-list { max-height: 140px; overflow-y: auto; }
+  .pay-pop-esc-item { display: flex; justify-content: space-between; align-items: center; padding: 3px 4px; border-bottom: 0.5px solid var(--border); }
+  .pay-pop-esc-item:last-child { border-bottom: none; }
+  .pay-pop-esc-item.current { background: var(--blue-pale); border-radius: 4px; border-bottom-color: transparent; }
+  .pay-pop-esc-yr { font-size: 10px; color: var(--text-muted); }
+  .pay-pop-esc-item.current .pay-pop-esc-yr { color: var(--navy); font-weight: 700; }
+  .pay-pop-esc-amt { font-size: 10px; font-weight: 600; color: var(--text-primary); text-align: right; }
+  .pay-pop-esc-badge { font-size: 8px; font-weight: 700; color: var(--green-text); background: var(--green-bg); border-radius: 8px; padding: 1px 5px; margin-left: 5px; }
+  .pay-pop-esc-note { font-size: 9px; color: var(--text-muted); font-style: italic; margin-top: 4px; }
   .pay-pop-close { position: absolute; top: 7px; right: 10px; background: none; border: none; color: rgba(255,255,255,.7); font-size: 14px; cursor: pointer; line-height: 1; padding: 2px 4px; }
   .pay-pop-close:hover { color: var(--white); }
   .pay-status { display: inline-block; font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
@@ -573,6 +584,11 @@
     </div>
     <div class="pay-pop-body">
       <div id="pop-info"></div>
+      <div id="pop-esc-wrap" class="pay-pop-esc" style="display:none;">
+        <div class="pay-pop-esc-title">Rent Escalation Forecast</div>
+        <div class="pay-pop-esc-list" id="pop-esc-list"></div>
+        <div id="pop-esc-note" class="pay-pop-esc-note" style="display:none;"></div>
+      </div>
       <div class="pay-pop-hist">
         <div class="pay-pop-hist-title">Payment History</div>
         <div id="pop-history"></div>
@@ -765,8 +781,9 @@ function renderKPIs() {
   const active    = total - cancelled;
   const pct       = active ? Math.round((done / active) * 100) : 0;
 
-  document.getElementById('kpi-total').textContent    = total;
-  document.getElementById('kpi-total-sub').textContent = `+ 1 Booster Station`;
+  document.getElementById('kpi-total').textContent    = active;
+  const cancelledIds = wtgData.filter(w => w.status === 'cancelled').map(w => 'WTG ' + w.id).join(', ');
+  document.getElementById('kpi-total-sub').textContent = `Active · ${cancelledIds} cancelled`;
   document.getElementById('kpi-done').textContent      = done;
   document.getElementById('kpi-done-sub').textContent  = `${pct}% of active WTGs`;
   document.getElementById('kpi-progress').textContent  = progress;
@@ -780,7 +797,7 @@ function renderKPIs() {
 
   // Update filter buttons with counts
   const fb = document.getElementById('filter-bar');
-  fb.children[0].innerHTML = `All <span style="opacity:.65;">(${total})</span>`;
+  fb.children[0].innerHTML = `All <span style="opacity:.65;">(${active})</span>`;
   fb.children[1].innerHTML = `Completed <span style="opacity:.65;">(${done})</span>`;
   fb.children[2].innerHTML = `In Progress <span style="opacity:.65;">(${progress})</span>`;
   fb.children[3].innerHTML = `Cancelled <span style="opacity:.65;">(${cancelled})</span>`;
@@ -1062,6 +1079,143 @@ const PAYMENT_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQFeHZ3
 let paymentData = [];
 let payFilter = 'urgent';
 
+// Rent escalation schedule (3% every 3 years) sourced from RROW COMPUTATION sheet.
+// Tier year ranges: [2025-26, 2027-29, 2030-32, 2033-35, 2036-38, 2039-41, 2042-44, 2045-47, 2048-50]
+const ESCALATION_TIER_YEARS = [[2025,2026],[2027,2029],[2030,2032],[2033,2035],[2036,2038],[2039,2041],[2042,2044],[2045,2047],[2048,2050]];
+const ESCALATION_DATA = {
+  "BOOSTER STATION||MA. EXCEL QUILANTANG||68340": { tiers: [68340,70390.2,72501.91,74676.96,76917.27,79224.79,81601.53,84049.58,86571.07], remarks: "" },
+  "WTG 1||ARLENE JALANDONI||149160": { tiers: [149160,153634.8,158243.84,162991.16,167880.89,172917.32,178104.84,183447.99,188951.43], remarks: "" },
+  "WTG 2||SEBASTIAN ESLEYER, PRIMO ESLEYER JR. AND SONIA ESLEYER||23000": { tiers: [23000,23690,24400.7,25132.72,25886.7,26663.3,27463.2,28287.1,29135.71], remarks: "" },
+  "WTG 2||ENRIQUE MONTAÑO||62000": { tiers: [62000,63860,65775.8,67749.07,69781.55,71874.99,74031.24,76252.18,78539.75], remarks: "" },
+  "WTG 2||GALEN TRECHO||147000": { tiers: [147000,151410,155952.3,160630.87,165449.8,170413.29,175525.69,180791.46,186215.2], remarks: "" },
+  "WTG 2||GEMMA ANALUCAS||395760": { tiers: [395760,407632.8,419861.78,432457.64,445431.37,458794.31,472558.14,486734.88,501336.93], remarks: "" },
+  "WTG 2||GEMMA ANALUCAS||116010": { tiers: [116010,119490.3,123075.01,126767.26,130570.28,134487.39,138522.01,142677.67,146958], remarks: "SUB LEASED" },
+  "WTG 2||SEBASTIAN ESLEYER, PRIMO ESLEYER JR. AND SONIA ESLEYER||155070": { tiers: [155070,159722.1,164513.76,169449.18,174532.65,179768.63,185161.69,190716.54,196438.04], remarks: "" },
+  "WTG 2||SEBASTIAN ESLEYER, PRIMO ESLEYER JR. AND SONIA ESLEYER||23700": { tiers: [23700,24411,25143.33,25897.63,26674.56,27474.8,28299.04,29148.01,30022.45], remarks: "" },
+  "WTG 3||GILBERT DOMINIC ESTEVEZ||42420": { tiers: [42420,43692.6,45003.38,46353.48,47744.08,49176.41,50651.7,52171.25,53736.39], remarks: "" },
+  "WTG 3||SEBASTIAN ESLEYER, PRIMO ESLEYER JR. AND SONIA ESLEYER||155070": { tiers: [155070,159722.1,164513.76,169449.18,174532.65,179768.63,185161.69,190716.54,196438.04], remarks: "" },
+  "WTG 4||PATRICIA PO||31500": { tiers: [31500,32445,33418.35,34420.9,35453.53,36517.13,37612.65,38741.03,39903.26], remarks: "" },
+  "WTG 4||PATRICIA PO||36780": { tiers: [36780,37883.4,39019.9,40190.5,41396.21,42638.1,43917.24,45234.76,46591.8], remarks: "" },
+  "WTG 4||ROMEO TAGUBILIN||78000": { tiers: [78000,80340,82750.2,85232.71,87789.69,90423.38,93136.08,95930.16,98808.07], remarks: "" },
+  "WTG 4||ROMEO TAGUBILIN||39060": { tiers: [39060,40231.8,41438.75,42681.92,43962.37,45281.25,46639.68,48038.87,49480.04], remarks: "" },
+  "WTG 6||SEBASTIAN ESLEYER, PRIMO ESLEYER JR. AND SONIA ESLEYER||43290": { tiers: [43290,44588.7,45926.36,47304.15,48723.28,50184.97,51690.52,53241.24,54838.48], remarks: "" },
+  "WTG 6||SEBASTIAN ESLEYER, PRIMO ESLEYER JR. AND SONIA ESLEYER||64000": { tiers: [64000,65920,67897.6,69934.53,72032.56,74193.54,76419.35,78711.93,81073.29], remarks: "" },
+  "WTG 6||SEBASTIAN ESLEYER, PRIMO ESLEYER JR. AND SONIA ESLEYER||120000": { tiers: [120000,123600,127308,131127.24,135061.06,139112.89,143286.28,147584.86,152012.41], remarks: "DAMAGE CLAIM" },
+  "WTG 9||MERLYN PAHILANGA||96330": { tiers: [96330,99219.9,102196.5,105262.39,108420.26,111672.87,115023.06,118473.75,122027.96], remarks: "" },
+  "WTG 10||SALVACION JALEA||31500": { tiers: [31500,32445,33418.35,34420.9,35453.53,36517.13,37612.65,38741.03,39903.26], remarks: "" },
+  "WTG 10||VIRGINIA BERBASTILLAS||5000": { tiers: [5000,5150,5304.5,5463.64,5627.54,5796.37,5970.26,6149.37,6333.85], remarks: "" },
+  "WTG 10||VIRGIE MOBREROS||41220": { tiers: [41220,42456.6,43730.3,45042.21,46393.47,47785.28,49218.84,50695.4,52216.26], remarks: "" },
+  "WTG 10||JOHN CASTILLO||1650": { tiers: [1650,1699.5,1750.49,1803,1857.09,1912.8,1970.19,2029.29,2090.17], remarks: "" },
+  "WTG 10||ARNOLD POLICARPIO||39000": { tiers: [39000,40170,41375.1,42616.35,43894.84,45211.69,46568.04,47965.08,49404.03], remarks: "" },
+  "WTG 10||ARNOLD POLICARPIO||85080": { tiers: [85080,87632.4,90261.37,92969.21,95758.29,98631.04,101589.97,104637.67,107776.8], remarks: "under Arnold Policarpio (Lease for two years)" },
+  "WTG 10||RIZALDE JAVIER & LORENA ARANA||52350": { tiers: [52350,53920.5,55538.12,57204.26,58920.39,60688,62508.64,64383.9,66315.41], remarks: "" },
+  "WTG 10||JELYN SANTILLANA||54180": { tiers: [54180,55805.4,57479.56,59203.95,60980.07,62809.47,64693.75,66634.57,68633.6], remarks: "" },
+  "WTG 10||ISAGANI GALIDO||35370": { tiers: [35370,36431.1,37524.03,38649.75,39809.25,41003.52,42233.63,43500.64,44805.66], remarks: "lease for 1 year" },
+  "WTG 10||ISAGANI GALIDO||8520": { tiers: [8520,8775.6,9038.87,9310.03,9589.34,9877.02,10173.33,10478.53,10792.88], remarks: "under Isagani Galido" },
+  "WTG 10||NOLI PAGARITA||120000": { tiers: [120000,123600,127308,131127.24,135061.06,139112.89,143286.28,147584.86,152012.41], remarks: "" },
+  "WTG 10||FLORDELIZA BUAL||10500": { tiers: [10500,10815,11139.45,11473.63,11817.84,12172.38,12537.55,12913.68,13301.09], remarks: "Advanced 25 years of lease" },
+  "WTG 10||CHERRY DUENAS/ DONALD DUEÑAS||92310": { tiers: [92310,95079.3,97931.68,100869.63,103895.72,107012.59,110222.97,113529.66,116935.55], remarks: "" },
+  "WTG 11||MANUEL ALIAS||44730": { tiers: [44730,46071.9,47454.06,48877.68,50344.01,51854.33,53409.96,55012.26,56662.63], remarks: "" },
+  "WTG 11||DANIEL ALIAS||43290": { tiers: [43290,44588.7,45926.36,47304.15,48723.28,50184.97,51690.52,53241.24,54838.48], remarks: "" },
+  "WTG 11||ELISA REGALADO||41760": { tiers: [41760,43012.8,44303.18,45632.28,47001.25,48411.29,49863.62,51359.53,52900.32], remarks: "" },
+  "WTG 11||ELISA REGALADO||36000": { tiers: [36000,37080,38192.4,39338.17,40518.32,41733.87,42985.88,44275.46,45603.72], remarks: "Under Elisa Regalado" },
+  "WTG 11||MA. LANIE AMBONG||4020": { tiers: [4020,4140.6,4264.82,4392.76,4524.55,4660.28,4800.09,4944.09,5092.42], remarks: "" },
+  "WTG 11||LIBERATO LACONSE||8130": { tiers: [8130,8373.9,8625.12,8883.87,9150.39,9424.9,9707.65,9998.87,10298.84], remarks: "" },
+  "WTG 11||EUSTAQUIO LACONSE||91320": { tiers: [91320,94059.6,96881.39,99787.83,102781.46,105864.91,109040.86,112312.08,115681.44], remarks: "2 years lease" },
+  "WTG 11||JOSE PACINO||8010": { tiers: [8010,8250.3,8497.81,8752.74,9015.33,9285.79,9564.36,9851.29,10146.83], remarks: "" },
+  "WTG 11||JAYMON GUARRA||38160": { tiers: [38160,39304.8,40483.94,41698.46,42949.42,44237.9,45565.04,46931.99,48339.95], remarks: "" },
+  "WTG 11||BERNIE QUINTO||19140": { tiers: [19140,19714.2,20305.63,20914.79,21542.24,22188.51,22854.16,23539.79,24245.98], remarks: "" },
+  "WTG 11||MARIO RENDON||12360": { tiers: [12360,12730.8,13112.72,13506.11,13911.29,14328.63,14758.49,15201.24,15657.28], remarks: "No Land Title" },
+  "WTG 11||SHERLY ARANA||40020": { tiers: [40020,41220.6,42457.22,43730.93,45042.86,46394.15,47785.97,49219.55,50696.14], remarks: "" },
+  "CONNECTING ROAD 11 -17||NIDA PAHILANGA||32070": { tiers: [32070,33032.1,34023.06,35043.75,36095.07,37177.92,38293.26,39442.05,40625.32], remarks: "" },
+  "CONNECTING ROAD 11 -17||SHIELA MAE DAVID||36060": { tiers: [36060,37141.8,38256.05,39403.74,40585.85,41803.42,43057.53,44349.25,45679.73], remarks: "" },
+  "CONNECTING ROAD 11 -17||MERLE ALABARTA||40740": { tiers: [40740,41962.2,43221.07,44517.7,45853.23,47228.83,48645.69,50105.06,51608.21], remarks: "" },
+  "WTG 12||SPS. HELEN GANANCIAL AND ALFREDO GANANCIAL||16020": { tiers: [16020,16500.6,16995.62,17505.49,18030.65,18571.57,19128.72,19702.58,20293.66], remarks: "" },
+  "WTG 12||MILA PERCAREY||40620": { tiers: [40620,41838.6,43093.76,44386.57,45718.17,47089.71,48502.4,49957.48,51456.2], remarks: "" },
+  "WTG 12||EVELYN MAGBANUA||12180": { tiers: [12180,12545.4,12921.76,13309.41,13708.7,14119.96,14543.56,14979.86,15429.26], remarks: "" },
+  "WTG 12||EDWIN MAGBANUA||17280": { tiers: [17280,17798.4,18332.35,18882.32,19448.79,20032.26,20633.22,21252.22,21889.79], remarks: "TITLE" },
+  "WTG 12||ROSALINA MAGBANUA||85980": { tiers: [85980,88559.4,91216.18,93952.67,96771.25,99674.38,102664.62,105744.55,108916.89], remarks: "2 YEARS LEASE" },
+  "WTG 12||REYNALDO GUARRA||20910": { tiers: [20910,21537.3,22183.42,22848.92,23534.39,24240.42,24967.63,25716.66,26488.16], remarks: "" },
+  "WTG 12||DENNIS LEGASPI||37570": { tiers: [37570,38697.1,39858.01,41053.75,42285.37,43553.93,44860.54,46206.36,47592.55], remarks: "" },
+  "WTG 12||ANECITA AZUELO||40080": { tiers: [40080,41282.4,42520.87,43796.5,45110.39,46463.7,47857.62,49293.34,50772.14], remarks: "" },
+  "WTG 13||EUGENIO BANGHA-ON||50100": { tiers: [50100,51603,53151.09,54745.62,56387.99,58079.63,59822.02,61616.68,63465.18], remarks: "" },
+  "WTG 13||TRINIDAD JALANDO-ON||11550": { tiers: [11550,11896.5,12253.4,12621,12999.63,13389.62,13791.3,14205.04,14631.19], remarks: "" },
+  "WTG 13||RAY AMAR||11580": { tiers: [11580,11927.4,12285.22,12653.78,13033.39,13424.39,13827.13,14241.94,14669.2], remarks: "" },
+  "WTG 13||MARK JANEO||26580": { tiers: [26580,27377.4,28198.72,29044.68,29916.02,30813.5,31737.91,32690.05,33670.75], remarks: "" },
+  "WTG 13||FERDINAND LAPIRA||27570": { tiers: [27570,28397.1,29249.01,30126.48,31030.28,31961.19,32920.02,33907.62,34924.85], remarks: "" },
+  "WTG 13||GEMMA BERJA||8400": { tiers: [8400,8652,8911.56,9178.91,9454.27,9737.9,10030.04,10330.94,10640.87], remarks: "" },
+  "WTG 13||RODEL MANDE||27570": { tiers: [27570,28397.1,29249.01,30126.48,31030.28,31961.19,32920.02,33907.62,34924.85], remarks: "" },
+  "WTG 13||TERISITA LAMADRE||15000": { tiers: [15000,15450,15913.5,16390.91,16882.63,17389.11,17910.78,18448.11,19001.55], remarks: "" },
+  "WTG 13||RESTITUTO MARIJUAN||29250": { tiers: [29250,30127.5,31031.33,31962.26,32921.13,33908.77,34926.03,35973.81,37053.02], remarks: "" },
+  "WTG 13||REGIE LAMADRE||30000": { tiers: [30000,30900,31827,32781.81,33765.26,34778.22,35821.57,36896.22,38003.1], remarks: "" },
+  "WTG 13||EDGARDO HINOLAN||17730": { tiers: [17730,18261.9,18809.76,19374.05,19955.27,20553.93,21170.55,21805.66,22459.83], remarks: "" },
+  "WTG 13||EDGARDO HINOLAN||9900": { tiers: [9900,10197,10502.91,10818,11142.54,11476.81,11821.12,12175.75,12541.02], remarks: "Under Edgardo Hinolan" },
+  "WTG 13||JOANNNAH FLORES||11550": { tiers: [11550,11896.5,12253.4,12621,12999.63,13389.62,13791.3,14205.04,14631.19], remarks: "" },
+  "WTG 13||VICTOR JAVIER||11370": { tiers: [11370,11711.1,12062.43,12424.31,12797.04,13180.95,13576.37,13983.67,14403.18], remarks: "" },
+  "WTG 13||VICTOR JAVIER||21000": { tiers: [21000,21630,22278.9,22947.27,23635.69,24344.76,25075.1,25827.35,26602.17], remarks: "Under Victor Javier" },
+  "WTG 13||GLENN MANA-AY||11400": { tiers: [11400,11742,12094.26,12457.09,12830.8,13215.72,13612.2,14020.56,14441.18], remarks: "" },
+  "WTG 14||GEMMA BERJA||7740": { tiers: [7740,7972.2,8211.37,8457.71,8711.44,8972.78,9241.96,9519.22,9804.8], remarks: "" },
+  "WTG 14||ANTONIO MENDOZA JR||8550": { tiers: [8550,8806.5,9070.7,9342.82,9623.1,9911.79,10209.15,10515.42,10830.88], remarks: "" },
+  "WTG 14||GUIDOL RUIZ||12090": { tiers: [12090,12452.7,12826.28,13211.07,13607.4,14015.62,14436.09,14869.18,15315.25], remarks: "" },
+  "WTG 14||GUIDOL RUIZ||36270": { tiers: [36270,37358.1,38478.84,39633.21,40822.2,42046.87,43308.28,44607.53,45945.75], remarks: "Advance Payment for 3 years" },
+  "WTG 14||VIRGILIO MAGBANUA||13470": { tiers: [13470,13874.1,14290.32,14719.03,15160.6,15615.42,16083.88,16566.4,17063.39], remarks: "" },
+  "WTG 14||DANILO ESMERALDA||15270": { tiers: [15270,15728.1,16199.94,16685.94,17186.52,17702.12,18233.18,18780.17,19343.58], remarks: "" },
+  "WTG 14||JUAN JALANDO-ON||21960": { tiers: [21960,22618.8,23297.36,23996.28,24716.17,25457.66,26221.39,27008.03,27818.27], remarks: "" },
+  "WTG 14||LUZVIMINDA TANAMAN||21360": { tiers: [21360,22000.8,22660.82,23340.65,24040.87,24762.09,25504.96,26270.11,27058.21], remarks: "" },
+  "WTG 14||TRINIDAD JALANDO-ON||18420": { tiers: [18420,18972.6,19541.78,20128.03,20731.87,21353.83,21994.44,22654.28,23333.9], remarks: "" },
+  "WTG 14||ESTRELLA GANATE||20160": { tiers: [20160,20764.8,21387.74,22029.38,22690.26,23370.97,24072.09,24794.26,25538.08], remarks: "" },
+  "WTG 14||CYNTHIA DAVID||20460": { tiers: [20460,21073.8,21706.01,22357.19,23027.91,23718.75,24430.31,25163.22,25918.12], remarks: "" },
+  "WTG 14||OFELIA TOLENTINO||28350": { tiers: [28350,29200.5,30076.52,30978.81,31908.17,32865.42,33851.38,34866.92,35912.93], remarks: "" },
+  "WTG 14||RICARDO OCAMPO||19770": { tiers: [19770,20363.1,20973.99,21603.21,22251.31,22918.85,23606.41,24314.61,25044.04], remarks: "" },
+  "WTG 14||RENANTE MENDOZA||32820": { tiers: [32820,33804.6,34818.74,35863.3,36939.2,38047.38,39188.8,40364.46,41575.39], remarks: "" },
+  "WTG 15||ANGELO MAMON||37170": { tiers: [37170,38285.1,39433.65,40616.66,41835.16,43090.22,44382.92,45714.41,47085.84], remarks: "" },
+  "WTG 15||MANUEL LACIDA JR.||25200": { tiers: [25200,25956,26734.68,27536.72,28362.82,29213.71,30090.12,30992.82,31922.61], remarks: "" },
+  "WTG 15||EDGARDO HINOLAN||13020": { tiers: [13020,13410.6,13812.92,14227.31,14654.12,15093.75,15546.56,16012.96,16493.35], remarks: "" },
+  "WTG 15||EDSEL ESPARES||36840": { tiers: [36840,37945.2,39083.56,40256.06,41463.74,42707.66,43988.89,45308.55,46667.81], remarks: "" },
+  "WTG 15||ADORA REOYAN||6240": { tiers: [6240,6427.2,6620.02,6818.62,7023.17,7233.87,7450.89,7674.41,7904.65], remarks: "" },
+  "WTG 15||ANGIE AMBONG||23100": { tiers: [23100,23793,24506.79,25241.99,25999.25,26779.23,27582.61,28410.09,29262.39], remarks: "" },
+  "WTG 15||DEXTER AGUSTIN||13020": { tiers: [13020,13410.6,13812.92,14227.31,14654.12,15093.75,15546.56,16012.96,16493.35], remarks: "" },
+  "WTG 15||EDGARDO GANATE||11580": { tiers: [11580,11927.4,12285.22,12653.78,13033.39,13424.39,13827.13,14241.94,14669.2], remarks: "" },
+  "WTG 15||JOVELYN CASTILLO||15360": { tiers: [15360,15820.8,16295.42,16784.29,17287.82,17806.45,18340.64,18890.86,19457.59], remarks: "" },
+  "WTG 15||MERLINA JIMENEZ||12000": { tiers: [12000,12360,12730.8,13112.72,13506.11,13911.29,14328.63,14758.49,15201.24], remarks: "" },
+  "WTG 15||NICANORA LABRADOR||1050": { tiers: [1050,1081.5,1113.95,1147.36,1181.78,1217.24,1253.75,1291.37,1330.11], remarks: "" },
+  "WTG 15||PLEBECITO LLENOS||40380": { tiers: [40380,41591.4,42839.14,44124.32,45448.05,46811.49,48215.83,49662.31,51152.18], remarks: "" },
+  "WTG 15||VIRGINIA ALOJADO||10500": { tiers: [10500,10815,11139.45,11473.63,11817.84,12172.38,12537.55,12913.68,13301.09], remarks: "" },
+  "WTG 17||SHEILA MAE DAVID||36060": { tiers: [36060,37141.8,38256.05,39403.74,40585.85,41803.42,43057.53,44349.25,45679.73], remarks: "" },
+  "WTG 17||RENE SISON||28350": { tiers: [28350,29200.5,30076.52,30978.81,31908.17,32865.42,33851.38,34866.92,35912.93], remarks: "" },
+  "WTG 17||NOEMI SANDICO||23340": { tiers: [23340,24040.2,24761.41,25504.25,26269.38,27057.46,27869.18,28705.26,29566.41], remarks: "" },
+  "WTG 17||FILIPE P. ALIOSA SR.||51930": { tiers: [51930,53487.9,55092.54,56745.31,58447.67,60201.1,62007.14,63867.35,65783.37], remarks: "" },
+  "WTG 17||NIDA PAHILANGA||32070": { tiers: [32070,33032.1,34023.06,35043.75,36095.07,37177.92,38293.26,39442.05,40625.32], remarks: "" },
+  "WTG 17||JAIME. JADILLO||40740": { tiers: [40740,41962.2,43221.07,44517.7,45853.23,47228.83,48645.69,50105.06,51608.21], remarks: "" },
+  "WTG 17||DARIUS PANGANIBAN||33030": { tiers: [33030,34020.9,35041.53,36092.77,37175.56,38290.82,39439.55,40622.73,41841.42], remarks: "" },
+  "WTG 18||JOAQUIN ANUALES||4010": { tiers: [4010,4130.3,4254.21,4381.84,4513.29,4648.69,4788.15,4931.79,5079.75], remarks: "" },
+  "WTG 19||NEMIA CABILOQUE||10890": { tiers: [10890,11216.7,11553.2,11899.8,12256.79,12624.49,13003.23,13393.33,13795.13], remarks: "" },
+  "WTG 19||RICKY DELA CRUZ||54150": { tiers: [54150,55774.5,57447.74,59171.17,60946.3,62774.69,64657.93,66597.67,68595.6], remarks: "" },
+  "WTG 19||JOHN VINGCO||34200": { tiers: [34200,35226,36282.78,37371.26,38492.4,39647.17,40836.59,42061.69,43323.54], remarks: "" },
+  "WTG 19||TOMAS MONDRAGON JR.||43020": { tiers: [43020,44310.6,45639.92,47009.12,48419.39,49871.97,51368.13,52909.17,54496.45], remarks: "" },
+  "WTG 19||JOB CRACO||74340": { tiers: [74340,76570.2,78867.31,81233.33,83670.32,86180.43,88765.85,91428.82,94171.69], remarks: "" },
+  "WTG 19||RUBEN BALBOA||7620": { tiers: [7620,7848.6,8084.06,8326.58,8576.38,8833.67,9098.68,9371.64,9652.79], remarks: "" },
+  "WTG 19||SONNY DELA CRUZ||17160": { tiers: [17160,17674.8,18205.04,18751.2,19313.73,19893.14,20489.94,21104.64,21737.77], remarks: "" },
+  "WTG 19||JANO TAYA||5880": { tiers: [5880,6056.4,6238.09,6425.23,6617.99,6816.53,7021.03,7231.66,7448.61], remarks: "" },
+  "WTG 21||LOPE GUMBAN||42620": { tiers: [42620,43898.6,45215.56,46572.02,47969.19,49408.26,50890.51,52417.22,53989.74], remarks: "" },
+  "WTG 22||ARNULFO MONTALES||30630": { tiers: [30630,31548.9,32495.37,33470.23,34474.33,35508.56,36573.82,37671.04,38801.17], remarks: "" },
+  "WTG 22||NOLI SALMORIN||66840": { tiers: [66840,68845.2,70910.56,73037.87,75229.01,77485.88,79810.46,82204.77,84670.91], remarks: "" },
+  "WTG 22||RONILO MONTALES||80850": { tiers: [80850,83275.5,85773.77,88346.98,90997.39,93727.31,96539.13,99435.3,102418.36], remarks: "" },
+  "WTG 22||ROSALINDA PAHILANGA||88140": { tiers: [88140,90784.2,93507.73,96312.96,99202.35,102178.42,105243.77,108401.08,111653.11], remarks: "" },
+  "WTG 23||ANGELIE MILABO||167010": { tiers: [167010,172020.3,177180.91,182496.34,187971.23,193610.36,199418.67,205401.23,211563.27], remarks: "" },
+  "WTG 23||ANALISA SAYLO||110160": { tiers: [110160,113464.8,116868.74,120374.81,123986.05,127705.63,131536.8,135482.91,139547.39], remarks: "" },
+  "WTG 23||GENUENIE DE JESUS||79530": { tiers: [79530,81915.9,84373.38,86904.58,89511.72,92197.07,94962.98,97811.87,100746.22], remarks: "" },
+  "WTG 24||ANALISA SAYLO||60480": { tiers: [60480,62294.4,64163.23,66088.13,68070.77,70112.9,72216.28,74382.77,76614.25], remarks: "" },
+  "WTG 24||ANGELIE MILABO||50130": { tiers: [50130,51633.9,53182.92,54778.4,56421.76,58114.41,59857.84,61653.58,63503.18], remarks: "" },
+  "WTG 24||ELENO MAGALLANES||55980": { tiers: [55980,57659.4,59389.18,61170.86,63005.98,64896.16,66843.05,68848.34,70913.79], remarks: "" },
+  "WTG 24||REYNALDO ZAMORA||314400": { tiers: [314400,323832,333546.96,343553.37,353859.97,364475.77,375410.04,386672.34,398272.51], remarks: "Ten Years Lease" },
+  "WTG 24||JIMMY ZAMORA||41880": { tiers: [41880,43136.4,44430.49,45763.41,47136.31,48550.4,50006.91,51507.12,53052.33], remarks: "" },
+  "WTG 24||RAQUEL & NINFA GONZALES||35190": { tiers: [35190,36245.7,37333.07,38453.06,39606.66,40794.85,42018.7,43279.26,44577.64], remarks: "" },
+  "WTG 24||NOEL SUMACOLOB||29610": { tiers: [29610,30498.3,31413.25,32355.65,33326.32,34326.11,35355.89,36416.57,37509.06], remarks: "" },
+  "WTG 24||REY EJASTRO||20640": { tiers: [20640,21259.2,21896.98,22553.89,23230.5,23927.42,24645.24,25384.6,26146.13], remarks: "" },
+  "WTG 24||ELEANOR SORIANO||277560": { tiers: [277560,285886.8,294463.4,303297.31,312396.23,321768.11,331421.16,341363.79,351604.7], remarks: "Two years Lease" },
+};
+
 async function loadPaymentData() {
   const url = PAYMENT_CSV_URL;
   const proxies = [
@@ -1089,6 +1243,12 @@ function getPaidMap() {
 }
 function setPaidMap(map) { localStorage.setItem(PAID_KEY, JSON.stringify(map)); }
 function paidRecordKey(p) { return `${p.wtg}||${p.name}`; }
+
+function findEscalation(rec) {
+  const norm = s => (s || '').replace(/\s+/g, ' ').trim().toUpperCase();
+  const key = `${norm(rec.wtg)}||${norm(rec.name)}||${Math.round(rec.amt || 0)}`;
+  return ESCALATION_DATA[key] || null;
+}
 
 function markAsPaid(key) {
   const map = getPaidMap();
@@ -1153,15 +1313,43 @@ function showPayPop(key, el) {
     }).join('');
   }
 
+  const escWrap = document.getElementById('pop-esc-wrap');
+  const esc = findEscalation(rec);
+  if (esc) {
+    const curYear = new Date().getFullYear();
+    let curIdx = ESCALATION_TIER_YEARS.findIndex(([, end]) => curYear <= end);
+    if (curIdx === -1) curIdx = ESCALATION_TIER_YEARS.length - 1;
+    document.getElementById('pop-esc-list').innerHTML = esc.tiers.map((amt, i) => {
+      const [start, end] = ESCALATION_TIER_YEARS[i] || [];
+      const yrLabel = start === end ? start : `${start}–${end}`;
+      const amtFmt2 = amt.toLocaleString('en-PH', { minimumFractionDigits:2, maximumFractionDigits:2 });
+      const isCurrent = i === curIdx;
+      const badge = i > 0 ? '<span class="pay-pop-esc-badge">+3%</span>' : '';
+      return `<div class="pay-pop-esc-item${isCurrent ? ' current' : ''}">
+        <span class="pay-pop-esc-yr">${yrLabel}</span>
+        <span class="pay-pop-esc-amt">₱ ${amtFmt2}${badge}</span>
+      </div>`;
+    }).join('');
+    const noteEl = document.getElementById('pop-esc-note');
+    if (esc.remarks) { noteEl.textContent = 'Note: ' + esc.remarks; noteEl.style.display = ''; }
+    else { noteEl.style.display = 'none'; }
+    escWrap.style.display = '';
+  } else {
+    escWrap.style.display = 'none';
+  }
+
   const pop = document.getElementById('pay-pop');
   pop.classList.add('visible');
   // Position near clicked element
   const rect = el.getBoundingClientRect();
-  const popW = 260, popH = 280;
-  let top = rect.bottom + 6 + window.scrollY;
-  let left = rect.left + window.scrollX;
+  const popW = 280, popH = esc ? 460 : 280;
+  // pay-pop is position:fixed, so coordinates are viewport-relative (no scroll offset needed)
+  let top = rect.bottom + 6;
+  let left = rect.left;
   if (left + popW > window.innerWidth - 10) left = window.innerWidth - popW - 10;
-  if (top + popH > window.scrollY + window.innerHeight - 10) top = rect.top + window.scrollY - popH - 6;
+  if (left < 10) left = 10;
+  if (top + popH > window.innerHeight - 10) top = rect.top - popH - 6;
+  if (top < 10) top = 10;
   pop.style.top  = top + 'px';
   pop.style.left = left + 'px';
 }
