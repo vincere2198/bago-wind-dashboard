@@ -726,6 +726,7 @@ let rrowChartInstance, cpChartInstance;
 const WTG_REPORT_ASOF = 'Jul 2026 field report';
 const WTG_REPORT_OVERRIDES = {
   '01': {
+    landowner: 'Arlene Jalandoni',
     site: 'Foundation drilling and piling scheduled for first week of August 2026',
     rrow: 'DONE CONSTRUCTION (Completed Nov. 2025)',
     remarks: 'Road works finished Nov 2025. PowerChina submitted the collection line design (24 Jul 2026); pending validation on whether it stays within the barangay road easement.',
@@ -734,6 +735,7 @@ const WTG_REPORT_OVERRIDES = {
     newPending: ['Collection line easement validation pending']
   },
   '02': {
+    landowner: 'Sonia Theresa Esleyer-Avelino',
     rrow: 'Constructed, but ~20m section needs expansion as part of a land swap with the adjacent landowner',
     remarks: 'Land swap agreed for the 75sqm platform encroachment into the neighboring lot. Pending BNEC approval of the lease payment and cost terms for the swapped area.',
     landownerDoc: { renewal: '20 Feb 2028', rpt: '₱93,547.14' },
@@ -744,6 +746,7 @@ const WTG_REPORT_OVERRIDES = {
     ]
   },
   '03': {
+    landowner: 'Edbert Jason Estevez',
     site: 'Foundation drilling and piling works done',
     cp: 'Construction COMPLETED',
     nia: 'Project will utilize the existing NIA road leading to WTG 03',
@@ -752,6 +755,7 @@ const WTG_REPORT_OVERRIDES = {
     landownerDoc: { renewal: '01 Nov 2026', rpt: '₱6,328.08' }
   },
   '04': {
+    landowner: 'Marc Albert Po',
     site: 'Foundation drilling and piling works done',
     remarks: 'Collection Line AB starts here; landowner negotiation ongoing (35 total along the line, 4 remaining to negotiate).',
     landownerDoc: { renewal: '01 Nov 2026', rpt: '₱6,279.12' },
@@ -759,18 +763,21 @@ const WTG_REPORT_OVERRIDES = {
     newPending: ['Collection Line AB negotiation ongoing (4 of 35 landowners remaining)']
   },
   '05': {
+    landowner: 'Christian Modesto',
     site: 'Foundation drilling and piling works done',
     remarks: "Trees owned by First Farmers along the access road may block turbine transport; First Farmers' board declined negotiation. Awaiting Ben Line Logistics' final inspection to decide on clearance or a route change.",
     landownerDoc: { renewal: '16 Jun 2027', rpt: '₱5,336.16' },
     newPending: ['First Farmers tree-clearing dispute — negotiation stalled, route revision possible']
   },
   '06': {
+    landowner: 'Sebastian Esleyer',
     site: 'Foundation drilling and piling works ongoing',
     remarks: 'Pending: Christopher Jacinto flagged that excavation thinned the canal slope, risking future leakage and crop damage. Referred to Engr. Denmark and Yrick for action.',
     landownerDoc: { renewal: '01 Nov 2026', rpt: '₱93,547.14' },
     newPending: ['Canal slope concern (Christopher Jacinto) referred to engineering team']
   },
   '08': {
+    landowner: 'Jose Jeremas Pigao',
     site: 'Foundation drilling and piling works done',
     cp: 'Construction COMPLETED',
     remarks: "Existing NIA Lateral C2A road improved; PowerChina needs it widened further for road slope and the collection line, so additional land is needed. Negotiating with the 3 remaining affected landowners (all based in Bacolod City). Romeo Tagubilin's utility poles will be relocated alongside the road expansion.",
@@ -781,6 +788,7 @@ const WTG_REPORT_OVERRIDES = {
     ]
   },
   '09': {
+    landowner: 'Danilo U. Famoso',
     site: 'Foundation drilling and piling works ongoing',
     cp: 'Construction schedule remains pending',
     remarks: 'Access road construction paused on a portion until the standing rice crop is harvested (tentatively end of July 2026). A newly identified affected area on a neighboring property needs a 5-year advance lease payment, pending BNEC approval.',
@@ -791,6 +799,7 @@ const WTG_REPORT_OVERRIDES = {
     ]
   },
   '10': {
+    landowner: 'Virgie O. Mobreros',
     site: 'Foundation drilling and piling works have not started',
     cp: 'Construction COMPLETED',
     remarks: 'Pending: Ben Line Logistics flagged a residential house as a possible transport-route obstruction during their latest inspection; still assessing whether mitigation is needed.',
@@ -798,6 +807,7 @@ const WTG_REPORT_OVERRIDES = {
     newPending: ['Residential house flagged as possible transport-route obstruction — assessment ongoing']
   },
   '11': {
+    landowner: 'Lourdes Arana / Melanie Barcelona',
     cp: 'Construction COMPLETED',
     rrow: 'Constructed, but ~80m section needs expansion; 4 of 5 affected landowners settled, remaining landowner still negotiating',
     remarks: 'Pending: a landowner reports irrigation-canal (drainage/washout) damage from nearby construction; referred to BNEC for evaluation. RROW expansion (~80m) still needs the last of 5 affected landowners to agree; his lot also carries the collection line.',
@@ -808,25 +818,28 @@ const WTG_REPORT_OVERRIDES = {
     ]
   },
   '12': {
+    landowner: 'Salvacion Salhay / Rolly Tingalon',
     cp: 'Construction COMPLETED',
     remarks: "Pending: a T12 RROW landowner is selling her property; the buyer wants BNEC's lease contract transferred to her name. Referred to Atty. Ace for legal review.",
     landownerDoc: { renewal: '01 Dec 2027', rpt: '₱1,552.77' },
     newPending: ['Lease-contract transfer request tied to a pending property sale — needs BNEC legal guidance']
   },
   '13': {
+    landowner: 'Eduardo Suyod / Joannah Suyod-Flores',
     site: 'Foundation drilling and piling works have not yet started',
     remarks: 'Pending: updated land title (with new beneficiaries) not yet issued. Existing 1-year leases with informal-settler occupants expire December 2026.',
     landownerDoc: { renewal: '07 Jan 2028', rpt: 'For re-computation' },
     newPending: ['Land title update pending; informal-settler leases expire Dec 2026']
   },
   '14': {
+    landowner: 'Jerry Gonzales',
     site: 'Foundation drilling and piling works have not yet started',
-    remarks: "Subject to verification with PDIC due to an adverse claim annotated on the title. (Verify: earlier note about a follow-up ₱75k advance payment to the landowner isn't mentioned in the latest report.)",
+    remarks: "Subject to verification with PDIC due to an adverse claim annotated on the title. The follow-up ₱75k advance payment (for standing crops) has been paid to the landowner.",
     landownerDoc: { renewal: '01 Nov 2027', rpt: '₱4,869.17' },
-    newPending: ['PDIC title verification needed (adverse claim annotated)'],
-    verify: ["Earlier note on a second ₱75k advance payment follow-up isn't mentioned in the new report — confirm if resolved"]
+    newPending: ['PDIC title verification needed (adverse claim annotated)']
   },
   '15': {
+    landowner: 'Edgardo Ganate',
     site: 'Foundation drilling and piling works have not yet started',
     rrow: 'Partially CONSTRUCTED',
     remarks: "RROW confirmed partially constructed, reversing prior progress per the field team.",
@@ -890,9 +903,10 @@ function processData(rows) {
     const status = detectStatus(remarks, r);
     wtgData.push({
       id, status, site, cp, rrow, nia,
-      nepc   : r[colMap.nepc]    || 'N/A',
-      tree   : r[colMap.tree]    || 'N/A',
+      nepc     : r[colMap.nepc]    || 'N/A',
+      tree     : r[colMap.tree]    || 'N/A',
       remarks,
+      landowner: ov && ov.landowner ? ov.landowner : null,
       rrowCat: detectRROWCat(rrow, status),
       cpCat  : detectCPCat(cp, status),
       reportUpdate: ov ? {
@@ -1092,7 +1106,7 @@ function selectWTG(id) {
   document.querySelectorAll('.wtg-cell').forEach(c => c.classList.remove('selected'));
   document.getElementById('cell-' + id).classList.add('selected');
   const w = wtgData.find(x => x.id === id);
-  document.getElementById('d-id').textContent     = 'WTG ' + w.id;
+  document.getElementById('d-id').textContent     = 'WTG ' + w.id + (w.landowner ? ' — ' + w.landowner : '');
   document.getElementById('d-site').textContent   = 'Tower site: ' + w.site;
   const badge = document.getElementById('d-badge');
   badge.textContent = w.status==='done'?'Completed':w.status==='cancelled'?'Cancelled':'In Progress';
